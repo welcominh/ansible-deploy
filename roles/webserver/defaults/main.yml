@@ -1,0 +1,10 @@
+---
+# defaults file for webserver
+application: direct-download
+keep_releases: 5
+deploy_to_root: /var/www/{{ application }}
+deploy_to: /var/www/{{ application }}/{{ stage }}
+repo_url: git@github.com:welcominh/direct-download.git
+linked_files:
+  - app/config/parameters.yml
+  - web/megasearch_similar_url.txt

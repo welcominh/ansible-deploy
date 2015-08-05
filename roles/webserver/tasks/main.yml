@@ -1,0 +1,52 @@
+---
+# tasks file for webserver
+- name: Get release timestamp
+  command: date +%Y-%m-%d_%H.%M.%S
+  register: timestamp
+
+- name: Create shared directory
+  file: >
+    state=directory
+    owner=root group=root
+    path={{ deploy_to_root }}/shared
+
+- name: Checkout git repo into release directory
+  git:
+    repo: "{{ repo_url }}"
+    dest: "{{ deploy_to }}/releases/{{ timestamp.stdout }}"
+    version: master
+
+# Permissions
+- name: Set permissions (Change ownership to www-data)
+  file: state=directory group=www-data owner=www-data recurse=yes path={{ deploy_to }}/releases/{{ timestamp.stdout }}
+- name: Set permissions (chmod 755 bootstrap)
+  file: mode=755 path={{ deploy_to }}/releases/{{ timestamp.stdout }}/bin/bootstrap
+
+- name: Bootstrap release
+  shell: cd {{ deploy_to }}/releases/{{ timestamp.stdout }} && bin/bootstrap --no-interaction
+  register: bootstrap_output
+- debug: var=bootstrap_output.stdout_lines
+
+- name: Delete release files to replace them by shared files
+  file:
+    state: absent
+    path: "{{ deploy_to }}/releases/{{ timestamp.stdout }}/{{ item }}"
+  with_items: linked_files
+
+- name: Symlink of shared files
+  file:
+    state: link
+    src: "{{ deploy_to_root }}/shared/{{ item }}"
+    dest: "{{ deploy_to }}/releases/{{ timestamp.stdout }}/{{ item }}"
+  with_items: linked_files
+
+- name: Create current symlink
+  #shell: cd {{ deploy_to }} && rm -f current && ln -s releases/{{ timestamp.stdout }} current
+  file:
+    state: link
+    src: "{{ deploy_to }}/releases/{{ timestamp.stdout }}"
+    dest: "{{ deploy_to }}/current"
+
+- name: Clean releases
+  when: keep_releases > 0
+  shell: cd {{ deploy_to }}/releases && ls -1r | tail -n +$(({{ keep_releases }} + 1)) | xargs rm -rf
