@@ -8,9 +8,12 @@
     - name: "stage"
       prompt: "Which stage to deploy ? (prod|staging)"
       private: no
-    - name: "parameters_file_path"
+      default: "staging"
+
+    - name: "parameters_file_path_input"
       prompt: "Path of your parameters.yml file ?"
       private: no
-    - name: "megasearch_similar_url_file_path"
+
+    - name: "megasearch_similar_url_file_path_input"
       prompt: "Path of your megasearch_similar_url.txt file ?"
       private: no
