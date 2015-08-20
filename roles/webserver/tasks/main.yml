@@ -1,5 +1,26 @@
 ---
-# tasks file for webserver
+# Application shared files
+- stat: path={{ deploy_to_root }}/shared/app/config/parameters.yml
+  register: parameters_yml
+- stat: path={{ deploy_to_root }}/shared/web/megasearch_similar_url.txt
+  register: megasearch_similar_url_txt
+- stat: path={{ parameters_file_path_input }}
+  register: parameters_yml_old
+- stat: path={{ megasearch_similar_url_file_path_input }}
+  register: megasearch_similar_url_txt_old
+
+# Init : Input errors => abort playbook
+- when: parameters_file_path_input != "" and parameters_yml_old.stat.exists == false
+  fail: msg="This parameters.yml file does not exist !"
+- when: parameters_file_path_input == "" and parameters_yml.stat.exists == false
+  fail: msg="There is no current parameters.yml file at all. You must specify one !"
+- when: megasearch_similar_url_file_path_input != "" and megasearch_similar_url_txt_old.stat.exists == false
+  fail: msg="This megasearch_similar_url.txt file does not exist !"
+- when: megasearch_similar_url_file_path_input == "" and megasearch_similar_url_txt.stat.exists == false
+  fail: msg="There is no current megasearch_similar_url.txt file at all. You must specify one !"
+- pause:
+
+# Start deploy process !!!
 - name: Get release timestamp
   command: date +%Y-%m-%d_%H.%M.%S
   register: timestamp
@@ -9,12 +30,22 @@
     state=directory
     owner=root group=root
     path={{ deploy_to_root }}/shared
+- name: Create logs directory
+  file: >
+    state=directory
+    owner=root group=root
+    path={{ deploy_to }}/logs
 
+# Copy shared files from existing source if they dont already exist
 - name: Add parameters.yml in shared directory
-  shell: mkdir -p {{ deploy_to_root }}/shared/app/config && cp {{ parameters_file_path }} {{ deploy_to_root }}/shared/app/config
+  shell: mkdir -p {{ deploy_to_root }}/shared/app/config && cp {{ parameters_file_path_input }} {{ deploy_to_root }}/shared/app/config
+  when: parameters_yml.stat.exists == false
 - name: Add megasearch_similar_url.txt in shared directory
-  shell: mkdir -p {{ deploy_to_root }}/shared/web && cp {{ megasearch_similar_url_file_path }} {{ deploy_to_root }}/shared/web
+  shell: mkdir -p {{ deploy_to_root }}/shared/web && cp {{ megasearch_similar_url_file_path_input }} {{ deploy_to_root }}/shared/web
+  when: megasearch_similar_url_txt.stat.exists == false
 - pause:
+
+
 - name: Checkout git repo into release directory
   git:
     repo: "{{ repo_url }}"
@@ -31,7 +62,17 @@
   shell: cd {{ deploy_to }}/releases/{{ timestamp.stdout }} && bin/bootstrap --no-interaction
   register: bootstrap_output
 - debug: var=bootstrap_output.stdout_lines
+- name: Clear cache
+  shell: cd {{ deploy_to }}/releases/{{ timestamp.stdout }} && rm -rf app/cache/*
 
+# Permissions
+- name: Set permissions (Change ownership to www-data)
+  file: state=directory group=www-data owner=www-data recurse=yes path={{ deploy_to }}/releases/{{ timestamp.stdout }}
+- name: Set permissions (chmod 755 bootstrap)
+  file: mode=755 path={{ deploy_to }}/releases/{{ timestamp.stdout }}/bin/bootstrap
+
+
+# Symlink shared files
 - name: Delete release files to replace them by shared files
   file:
     state: absent
@@ -45,12 +86,14 @@
     dest: "{{ deploy_to }}/releases/{{ timestamp.stdout }}/{{ item }}"
   with_items: linked_files
 
+
+# Symlink of the release
 - name: Create current symlink
-  #shell: cd {{ deploy_to }} && rm -f current && ln -s releases/{{ timestamp.stdout }} current
   file:
     state: link
     src: "{{ deploy_to }}/releases/{{ timestamp.stdout }}"
     dest: "{{ deploy_to }}/current"
+
 
 - name: Clean releases
   when: keep_releases > 0
