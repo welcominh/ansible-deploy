@@ -53,10 +53,7 @@
     version: master
 
 # Permissions
-- name: Set permissions (Change ownership to www-data)
-  file: state=directory group=www-data owner=www-data recurse=yes path={{ deploy_to }}/releases/{{ timestamp.stdout }}
-- name: Set permissions (chmod 755 bootstrap)
-  file: mode=755 path={{ deploy_to }}/releases/{{ timestamp.stdout }}/bin/bootstrap
+- include: permissions.yml
 
 - name: Bootstrap release
   shell: cd {{ deploy_to }}/releases/{{ timestamp.stdout }} && bin/bootstrap --no-interaction
@@ -66,10 +63,7 @@
   shell: cd {{ deploy_to }}/releases/{{ timestamp.stdout }} && rm -rf app/cache/*
 
 # Permissions
-- name: Set permissions (Change ownership to www-data)
-  file: state=directory group=www-data owner=www-data recurse=yes path={{ deploy_to }}/releases/{{ timestamp.stdout }}
-- name: Set permissions (chmod 755 bootstrap)
-  file: mode=755 path={{ deploy_to }}/releases/{{ timestamp.stdout }}/bin/bootstrap
+- include: permissions.yml
 
 
 # Symlink shared files

@@ -1,0 +1,4 @@
+- name: Set permissions (Change ownership to www-data)
+  file: state=directory group=www-data owner=www-data recurse=yes path={{ deploy_to }}/releases/{{ timestamp.stdout }}
+- name: Set permissions (chmod 755 bootstrap)
+  file: mode=755 path={{ deploy_to }}/releases/{{ timestamp.stdout }}/bin/bootstrap
