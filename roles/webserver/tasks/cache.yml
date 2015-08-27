@@ -1,0 +1,3 @@
+---
+- name: Clear cache
+  shell: cd {{ deploy_to }}/releases/{{ timestamp.stdout }} && rm -rf app/cache/*
