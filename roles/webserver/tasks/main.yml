@@ -1,28 +1,9 @@
 ---
 - include: structure.yml
+- include: deploy.yml
 
-# Start deploy process !!!
-- name: Get release timestamp
-  command: date +%Y-%m-%d_%H.%M.%S
-  register: timestamp
-
-- name: Checkout git repo into release directory
-  git:
-    repo: "{{ repo_url }}"
-    dest: "{{ deploy_to }}/releases/{{ timestamp.stdout }}"
-    version: master
-
-# Permissions
 - include: permissions.yml
-
-- name: Bootstrap release
-  shell: cd {{ deploy_to }}/releases/{{ timestamp.stdout }} && bin/bootstrap --no-interaction
-  register: bootstrap_output
-- debug: var=bootstrap_output.stdout_lines
-- name: Clear cache
-  shell: cd {{ deploy_to }}/releases/{{ timestamp.stdout }} && rm -rf app/cache/*
-
-# Permissions
+- include: bootstrap.yml
 - include: permissions.yml
 
 
