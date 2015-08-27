@@ -8,3 +8,8 @@
 
 - include: symlink_shared_files.yml
 - include: release.yml
+
+
+- include: rollback.yml
+  tags:
+    - rollback
