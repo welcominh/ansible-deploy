@@ -20,5 +20,17 @@
   fail: msg="There is no current megasearch_similar_url.txt file at all. You must specify one !"
 
 
+- name: Create shared directory
+  file: >
+    state=directory
+    owner=root group=root
+    path={{ deploy_to_root }}/shared
+- name: Create logs directory
+  file: >
+    state=directory
+    owner=root group=root
+    path={{ deploy_to }}/logs
+
+
 - debug: msg="Files structure verified. Everything is OK !"
 - pause:
