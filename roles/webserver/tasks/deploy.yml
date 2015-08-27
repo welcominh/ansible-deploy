@@ -1,0 +1,10 @@
+---
+- name: Get release timestamp
+  command: date +%Y-%m-%d_%H.%M.%S
+  register: timestamp
+
+- name: Checkout git repo into release directory
+  git:
+    repo: "{{ repo_url }}"
+    dest: "{{ deploy_to }}/releases/{{ timestamp.stdout }}"
+    version: master
