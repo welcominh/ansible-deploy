@@ -6,20 +6,7 @@
 - include: bootstrap.yml
 - include: permissions.yml
 
-
-# Symlink shared files
-- name: Delete release files to replace them by shared files
-  file:
-    state: absent
-    path: "{{ deploy_to }}/releases/{{ timestamp.stdout }}/{{ item }}"
-  with_items: linked_files
-
-- name: Symlink of shared files
-  file:
-    state: link
-    src: "{{ deploy_to_root }}/shared/{{ item }}"
-    dest: "{{ deploy_to }}/releases/{{ timestamp.stdout }}/{{ item }}"
-  with_items: linked_files
+- include: symlink_shared_files.yml
 
 
 # Symlink of the release
