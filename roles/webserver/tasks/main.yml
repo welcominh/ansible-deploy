@@ -7,16 +7,4 @@
 - include: permissions.yml
 
 - include: symlink_shared_files.yml
-
-
-# Symlink of the release
-- name: Create current symlink
-  file:
-    state: link
-    src: "{{ deploy_to }}/releases/{{ timestamp.stdout }}"
-    dest: "{{ deploy_to }}/current"
-
-
-- name: Clean releases
-  when: keep_releases > 0
-  shell: cd {{ deploy_to }}/releases && ls -1r | tail -n +$(({{ keep_releases }} + 1)) | xargs rm -rf
+- include: release.yml
