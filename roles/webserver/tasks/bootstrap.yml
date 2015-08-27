@@ -3,5 +3,8 @@
   shell: cd {{ deploy_to }}/releases/{{ timestamp.stdout }} && bin/bootstrap --no-interaction
   register: bootstrap_output
 - debug: var=bootstrap_output.stdout_lines
-- name: Clear cache
-  shell: cd {{ deploy_to }}/releases/{{ timestamp.stdout }} && rm -rf app/cache/*
+- include: cache.yml
+
+
+- debug: msg="Release bootstrapped successfully !"
+- pause:

@@ -8,3 +8,7 @@
     repo: "{{ repo_url }}"
     dest: "{{ deploy_to }}/releases/{{ timestamp.stdout }}"
     version: master
+
+
+- debug: msg="Git repo cloned successfully !"
+- pause:
