@@ -1,24 +1,5 @@
 ---
-# Application shared files
-- stat: path={{ deploy_to_root }}/shared/app/config/parameters.yml
-  register: parameters_yml
-- stat: path={{ deploy_to_root }}/shared/web/megasearch_similar_url.txt
-  register: megasearch_similar_url_txt
-- stat: path={{ parameters_file_path_input }}
-  register: parameters_yml_old
-- stat: path={{ megasearch_similar_url_file_path_input }}
-  register: megasearch_similar_url_txt_old
-
-# Init : Input errors => abort playbook
-- when: parameters_file_path_input != "" and parameters_yml_old.stat.exists == false
-  fail: msg="This parameters.yml file does not exist !"
-- when: parameters_file_path_input == "" and parameters_yml.stat.exists == false
-  fail: msg="There is no current parameters.yml file at all. You must specify one !"
-- when: megasearch_similar_url_file_path_input != "" and megasearch_similar_url_txt_old.stat.exists == false
-  fail: msg="This megasearch_similar_url.txt file does not exist !"
-- when: megasearch_similar_url_file_path_input == "" and megasearch_similar_url_txt.stat.exists == false
-  fail: msg="There is no current megasearch_similar_url.txt file at all. You must specify one !"
-- pause:
+- include: structure.yml
 
 # Start deploy process !!!
 - name: Get release timestamp
