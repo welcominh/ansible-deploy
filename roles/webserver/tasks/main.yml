@@ -1,15 +1,6 @@
 ---
 - include: structure.yml
 
-# Copy shared files from existing source if they dont already exist
-- name: Add parameters.yml in shared directory
-  shell: mkdir -p {{ deploy_to_root }}/shared/app/config && cp {{ parameters_file_path_input }} {{ deploy_to_root }}/shared/app/config
-  when: parameters_yml.stat.exists == false
-- name: Add megasearch_similar_url.txt in shared directory
-  shell: mkdir -p {{ deploy_to_root }}/shared/web && cp {{ megasearch_similar_url_file_path_input }} {{ deploy_to_root }}/shared/web
-  when: megasearch_similar_url_txt.stat.exists == false
-- pause:
-
 # Start deploy process !!!
 - name: Get release timestamp
   command: date +%Y-%m-%d_%H.%M.%S
